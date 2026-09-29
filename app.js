@@ -10,10 +10,10 @@ const AXES = [
 
 // 軸コード → 表示コード
 const TYPE_MAP = {
-  APHC: "NMKJ", APHM: "JKMR", APTC: "SKTR", APTM: "DNKS",
-  AFHC: "MRAG", AFHM: "TKKM", AFTC: "DNWT", AFTM: "MDAK",
-  SPHC: "OCKM", SPHM: "GJRK", SPTC: "KTZK", SPTM: "HNKO",
-  SFHC: "KKYM", SFHM: "AIZC", SFTC: "KPGK", SFTM: "GMST",
+  APHC: "NMKJ", APHM: "YSGK", APTC: "BSTR", APTM: "DNKS",
+  AFHC: "DNWT", AFHM: "BNTC", AFTC: "TKFK", AFTM: "MDAK",
+  SPHC: "OCKM", SPHM: "GJRK", SPTC: "BHHC", SPTM: "HNKO",
+  SFHC: "OMYG", SFHM: "EBOS", SFTC: "MZYR", SFTM: "GMST",
 };
 
 // 左（そう思う）→ 右（そう思わない）
