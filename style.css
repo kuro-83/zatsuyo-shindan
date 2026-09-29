@@ -207,12 +207,49 @@ main { flex: 1; }
 .axis-track { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; margin-top: 4px; }
 .axis-fill { height: 100%; background: var(--accent); border-radius: 999px; }
 
+/* 共有エリア */
+.share {
+  margin-top: 48px;
+  padding: 24px 20px;
+  background: var(--accent-soft);
+  border-radius: 16px;
+  text-align: center;
+}
+.share-label { font-weight: 700; font-size: 15px; margin: 0 0 16px; }
+.share-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.share-btn {
+  flex: 0 1 140px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.share-btn:hover { border-color: var(--accent); color: var(--accent); }
+.share-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.share-btn[hidden] { display: none; }
+
 .actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-  margin: 48px 0 72px;
+  margin: 32px 0 72px;
 }
 
 .error { color: #b91c1c; text-align: center; }
@@ -226,4 +263,7 @@ main { flex: 1; }
   .choice[data-v="2"], .choice[data-v="-2"] { width: 52px; height: 52px; }
   .choice[data-v="1"], .choice[data-v="-1"] { width: 42px; height: 42px; }
   .actions .btn { width: 100%; }
+  .share { padding: 20px 16px; }
+  .share-buttons { display: grid; grid-template-columns: 1fr 1fr; }
+  #share-native { grid-column: 1 / -1; }
 }

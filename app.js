@@ -169,10 +169,64 @@ async function showResult() {
     $("result-body").innerHTML = `<p class="error">結果の文章（results/${code}.md）を読み込めませんでした。</p>`;
   }
 
-  const siteUrl = location.origin + location.pathname;
-  const text = `私は ${code}（${role}）型でした。#16ZATSUYO`;
-  $("btn-share").href =
-    "https://x.com/intent/tweet?text=" + encodeURIComponent(text) + "&url=" + encodeURIComponent(siteUrl);
+  setupShare(`私は ${code}（${role}）型でした。#16ZATSUYO`, location.origin + location.pathname);
+}
+
+// 共有ボタン（文章とURLは全ボタン共通）
+let share = { text: "", url: "" };
+
+function setupShare(text, url) {
+  share = { text, url };
+  const t = encodeURIComponent(text);
+  const u = encodeURIComponent(url);
+  $("share-x").href = `https://x.com/intent/tweet?text=${t}&url=${u}`;
+  // LINE Social Plugins「LINEで送る」（カスタムアイコン用リンク）
+  $("share-line").href = `https://social-plugins.line.me/lineit/share?url=${u}&text=${t}`;
+  // Threads Web Intent
+  $("share-threads").href = `https://www.threads.com/intent/post?text=${t}&url=${u}`;
+}
+
+function copyWithTextarea(str) {
+  const ta = document.createElement("textarea");
+  ta.value = str;
+  ta.setAttribute("readonly", "");
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  const ok = document.execCommand("copy");
+  document.body.removeChild(ta);
+  if (!ok) throw new Error("copy failed");
+}
+
+let copyTimer;
+async function copyLink() {
+  const btn = $("share-copy");
+  const str = `${share.text}\n${share.url}`;
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(str);
+    } else {
+      copyWithTextarea(str);
+    }
+  } catch {
+    try {
+      copyWithTextarea(str);
+    } catch {
+      return;
+    }
+  }
+  btn.textContent = "コピーしました";
+  clearTimeout(copyTimer);
+  copyTimer = setTimeout(() => (btn.textContent = "リンクをコピー"), 2000);
+}
+
+async function nativeShare() {
+  try {
+    await navigator.share({ title: "16ZATSUYO｜雑用タイプ診断", text: share.text, url: share.url });
+  } catch (e) {
+    if (e.name !== "AbortError") console.warn(e);
+  }
 }
 
 function start() {
@@ -187,6 +241,11 @@ async function init() {
   $("btn-start").addEventListener("click", start);
   $("btn-back").addEventListener("click", back);
   $("btn-retry").addEventListener("click", () => showScreen("start"));
+  $("share-copy").addEventListener("click", copyLink);
+  if (typeof navigator.share === "function") {
+    $("share-native").hidden = false;
+    $("share-native").addEventListener("click", nativeShare);
+  }
   try {
     await loadQuestions();
   } catch (e) {
