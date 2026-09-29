@@ -1,0 +1,30 @@
+[
+  {
+    "id": "shikiriya",
+    "axes": "AP",
+    "name": "仕切り屋",
+    "description": "誰かが言い出さなければ始まらないことを、必ず最初に言い出す人たち。",
+    "types": ["NMKJ", "YSGK", "BSTR", "DNKS"]
+  },
+  {
+    "id": "shunpatsuya",
+    "axes": "AF",
+    "name": "瞬発屋",
+    "description": "誰よりも先に体が動き、気づいたときにはもう終わらせている人たち。",
+    "types": ["DNWT", "BNTC", "TKFK", "MDAK"]
+  },
+  {
+    "id": "uragata",
+    "axes": "SP",
+    "name": "裏方",
+    "description": "名前が表に出ることはなくても、組織の日常を確実に回し続ける人たち。",
+    "types": ["OCKM", "GJRK", "BHHC", "HNKO"]
+  },
+  {
+    "id": "tsuideya",
+    "axes": "SF",
+    "name": "ついで屋",
+    "description": "業務の合間に生まれる小さな空白を、誰よりも有効に活用する人たち。",
+    "types": ["OMYG", "EBOS", "MZYR", "GMST"]
+  }
+]

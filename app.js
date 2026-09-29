@@ -25,6 +25,9 @@ const CHOICES = [
   { value: -2, label: "全くそう思わない" },
 ];
 
+// 16タイプのコード
+const TYPE_CODES = Object.values(TYPE_MAP);
+
 let questions = [];
 let answers = [];
 let current = 0;
@@ -106,24 +109,6 @@ function calcScores() {
   return scores;
 }
 
-// .md を「役割名・キャッチコピー・本文」に分ける
-function parseResult(md) {
-  const lines = md.replace(/\r\n/g, "\n").split("\n");
-  let role = "";
-  let catchCopy = "";
-  const rest = [];
-  for (const line of lines) {
-    if (!role && /^#\s+/.test(line)) {
-      role = line.replace(/^#\s+/, "").trim();
-    } else if (!catchCopy && /^>\s?/.test(line)) {
-      catchCopy = line.replace(/^>\s?/, "").trim();
-    } else {
-      rest.push(line);
-    }
-  }
-  return { role, catchCopy, body: rest.join("\n").trim() };
-}
-
 function renderAxes(scores) {
   const box = $("result-axes");
   box.innerHTML = "";
@@ -149,27 +134,82 @@ async function showResult() {
   const axisCode = AXES.map((a, i) => (scores[i] >= 0 ? a.plus : a.minus)).join("");
   const code = TYPE_MAP[axisCode];
 
+  renderAxes(scores);
+  const role = await renderType(code, "result");
+  setupShare(`私は ${code}（${role}）型でした。#16ZATSUYO`, `${location.origin}${location.pathname}?type=${code}`);
+}
+
+// タイプ紹介画面（?type=◯◯◯◯ で開いたとき）
+function showIntro(code) {
+  renderType(code, "intro");
+}
+
+// 結果画面・紹介画面の共通部分。役割名を返す
+async function renderType(code, mode) {
+  const isResult = mode === "result";
+  $("result-eyebrow").textContent = isResult ? "あなたのタイプ" : "タイプ紹介";
+  $("result-only").hidden = !isResult;
+  $("intro-only").hidden = isResult;
+
   $("result-code").textContent = code;
   $("result-role").textContent = "";
   $("result-catch").textContent = "";
   $("result-body").innerHTML = "";
-  renderAxes(scores);
+  $("result-group").hidden = true;
   showScreen("result");
 
-  let role = code;
+  renderGroup(code);
+
   try {
-    const res = await fetch(`results/${code}.md`, { cache: "no-store" });
-    if (!res.ok) throw new Error();
-    const parsed = parseResult(await res.text());
-    role = parsed.role || code;
+    const parsed = await loadResult(code);
     $("result-role").textContent = parsed.role;
     $("result-catch").textContent = parsed.catchCopy;
     $("result-body").innerHTML = marked.parse(parsed.body, { breaks: true });
+    linkCompatibleTypes($("result-body"));
+    return parsed.role || code;
   } catch {
     $("result-body").innerHTML = `<p class="error">結果の文章（results/${code}.md）を読み込めませんでした。</p>`;
+    return code;
   }
+}
 
-  setupShare(`私は ${code}（${role}）型でした。#16ZATSUYO`, location.origin + location.pathname);
+// グループ名（types.html の該当グループへのリンク）
+async function renderGroup(code) {
+  const group = (await groupsReady).find((g) => g.types.includes(code));
+  if (!group || $("result-code").textContent !== code) return;
+  const el = $("result-group");
+  el.textContent = group.name;
+  el.href = `types.html#${group.id}`;
+  el.hidden = false;
+}
+
+// 「相性のいいタイプ」見出しより後のタイプコードを、紹介ページへのリンクにする
+function linkCompatibleTypes(body) {
+  const heading = [...body.querySelectorAll("h2")].find((h) => h.textContent.includes("相性のいいタイプ"));
+  if (!heading) return;
+  const pattern = new RegExp(`\\b(${TYPE_CODES.join("|")})\\b(（[^）]*）)?`, "g");
+  for (let el = heading.nextElementSibling; el; el = el.nextElementSibling) {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach((node) => {
+      const text = node.textContent;
+      pattern.lastIndex = 0;
+      if (!pattern.test(text)) return;
+      const frag = document.createDocumentFragment();
+      let last = 0;
+      text.replace(pattern, (match, code, _role, offset) => {
+        frag.append(text.slice(last, offset));
+        const a = document.createElement("a");
+        a.href = `?type=${code}`;
+        a.textContent = match;
+        frag.append(a);
+        last = offset + match.length;
+      });
+      frag.append(text.slice(last));
+      node.replaceWith(frag);
+    });
+  }
 }
 
 // 共有ボタン（文章とURLは全ボタン共通）
@@ -229,7 +269,12 @@ async function nativeShare() {
   }
 }
 
+let groupsReady;
+let questionsReady;
+
 function start() {
+  // 紹介ページ（?type=）から始めたときは、URLをトップに戻す
+  if (location.search) history.replaceState(null, "", location.pathname);
   answers = new Array(questions.length);
   current = 0;
   renderQuestion();
@@ -241,13 +286,23 @@ async function init() {
   $("btn-start").addEventListener("click", start);
   $("btn-back").addEventListener("click", back);
   $("btn-retry").addEventListener("click", () => showScreen("start"));
+  $("btn-try").addEventListener("click", async () => {
+    await questionsReady;
+    if (questions.length) start();
+  });
   $("share-copy").addEventListener("click", copyLink);
   if (typeof navigator.share === "function") {
     $("share-native").hidden = false;
     $("share-native").addEventListener("click", nativeShare);
   }
+  groupsReady = loadGroups().catch(() => []);
+  questionsReady = loadQuestions();
+
+  const type = (new URLSearchParams(location.search).get("type") || "").toUpperCase();
+  if (TYPE_CODES.includes(type)) showIntro(type);
+
   try {
-    await loadQuestions();
+    await questionsReady;
   } catch (e) {
     $("btn-start").disabled = true;
     $("btn-start").insertAdjacentHTML("afterend", `<p class="error">${e.message}</p>`);

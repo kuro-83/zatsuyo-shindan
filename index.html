@@ -25,6 +25,7 @@
   <header class="site-header">
     <div class="container">
       <a href="./" class="logo">16<span>ZATSUYO</span></a>
+      <nav class="site-nav"><a href="types.html">タイプ一覧</a></nav>
     </div>
   </header>
 
@@ -71,31 +72,39 @@
     <section id="screen-result" class="screen">
       <div class="result-hero">
         <div class="container narrow">
-          <p class="eyebrow">あなたのタイプ</p>
+          <p id="result-eyebrow" class="eyebrow">あなたのタイプ</p>
           <p id="result-code" class="result-code"></p>
           <h2 id="result-role" class="result-role"></h2>
+          <a id="result-group" class="group-tag" hidden></a>
           <p id="result-catch" class="result-catch"></p>
         </div>
       </div>
       <div class="container narrow">
         <article id="result-body" class="result-body"></article>
 
-        <h3 class="section-title">あなたの指標</h3>
-        <div id="result-axes" class="result-axes"></div>
+        <div id="result-only">
+          <h3 class="section-title">あなたの指標</h3>
+          <div id="result-axes" class="result-axes"></div>
 
-        <div class="share">
-          <p class="share-label">結果をシェアする</p>
-          <div class="share-buttons">
-            <a id="share-x" class="share-btn" target="_blank" rel="noopener">X</a>
-            <a id="share-line" class="share-btn" target="_blank" rel="noopener">LINEで送る</a>
-            <a id="share-threads" class="share-btn" target="_blank" rel="noopener">Threads</a>
-            <button id="share-copy" class="share-btn" type="button">リンクをコピー</button>
-            <button id="share-native" class="share-btn" type="button" hidden>その他</button>
+          <div class="share">
+            <p class="share-label">結果をシェアする</p>
+            <div class="share-buttons">
+              <a id="share-x" class="share-btn" target="_blank" rel="noopener">X</a>
+              <a id="share-line" class="share-btn" target="_blank" rel="noopener">LINEで送る</a>
+              <a id="share-threads" class="share-btn" target="_blank" rel="noopener">Threads</a>
+              <button id="share-copy" class="share-btn" type="button">リンクをコピー</button>
+              <button id="share-native" class="share-btn" type="button" hidden>その他</button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="btn-retry" class="btn btn-outline">もう一度診断する</button>
           </div>
         </div>
 
-        <div class="actions">
-          <button id="btn-retry" class="btn btn-outline">もう一度診断する</button>
+        <div id="intro-only" class="actions" hidden>
+          <button id="btn-try" class="btn btn-primary">あなたも診断する</button>
+          <a href="types.html" class="btn btn-outline">全タイプを見る</a>
         </div>
       </div>
     </section>
@@ -106,6 +115,7 @@
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+  <script src="common.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
